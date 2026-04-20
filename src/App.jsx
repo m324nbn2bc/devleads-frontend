@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-// Backend URL is injected at build time via Railway environment variable
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 function timeAgo(ts) {
@@ -12,96 +11,129 @@ function timeAgo(ts) {
 }
 
 const TAG_COLORS = {
-  "next.js": "#00d4ff", "nextjs": "#00d4ff",
-  "react": "#61dafb", "frontend developer": "#f472b6",
-  "full stack": "#34d399", "fullstack": "#34d399",
-  "node.js": "#86efac", "javascript developer": "#fbbf24",
-  "need developer": "#fb923c", "hire developer": "#fb923c",
-  "looking for developer": "#fb923c", "seeking developer": "#fb923c",
-  "web developer": "#a78bfa",
+  "next.js": "#4f8ef7", "nextjs": "#4f8ef7",
+  "react": "#4f8ef7", "frontend developer": "#9b7fe8",
+  "full stack": "#3dab7a", "fullstack": "#3dab7a",
+  "node.js": "#3dab7a", "javascript developer": "#c49a2a",
+  "need developer": "#c4722a", "hire developer": "#c4722a",
+  "looking for developer": "#c4722a", "seeking developer": "#c4722a",
+  "web developer": "#9b7fe8",
+};
+
+const THEMES = {
+  dark: {
+    bg: "#0f1117",
+    surface: "#181b23",
+    border: "#2a2d3a",
+    text: "#e2e4ed",
+    textMuted: "#6b7280",
+    textFaint: "#3d4150",
+    accent: "#4f8ef7",
+    accentSoft: "rgba(79,142,247,0.1)",
+    accentBorder: "rgba(79,142,247,0.22)",
+    newBg: "#14172a",
+    newBorder: "rgba(79,142,247,0.28)",
+    errorBg: "rgba(200,60,60,0.07)",
+    errorBorder: "rgba(200,60,60,0.2)",
+    errorText: "#d07070",
+    inputBg: "#13161e",
+    statsBg: "#13161e",
+  },
+  light: {
+    bg: "#f4f3ef",
+    surface: "#ffffff",
+    border: "#e6e4de",
+    text: "#1a1c22",
+    textMuted: "#7a7d88",
+    textFaint: "#b8bbc6",
+    accent: "#3b7de8",
+    accentSoft: "rgba(59,125,232,0.08)",
+    accentBorder: "rgba(59,125,232,0.2)",
+    newBg: "#f0f4fd",
+    newBorder: "rgba(59,125,232,0.22)",
+    errorBg: "rgba(190,50,50,0.05)",
+    errorBorder: "rgba(190,50,50,0.15)",
+    errorText: "#b04040",
+    inputBg: "#ffffff",
+    statsBg: "#ffffff",
+  },
 };
 
 function ContactBadge({ contacts }) {
   if (!contacts) return null;
   return (
-    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "6px" }}>
+    <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginTop: "6px" }}>
       {contacts.emails?.map(e => (
-        <a key={e} href={`mailto:${e}`} onClick={ev => ev.stopPropagation()}
+        <a key={e} href={"mailto:" + e} onClick={ev => ev.stopPropagation()}
           style={{
-            fontSize: "11px", fontWeight: 600, color: "#34d399", fontFamily: "monospace",
-            background: "rgba(52,211,153,0.1)", padding: "2px 8px", borderRadius: "5px",
-            border: "1px solid rgba(52,211,153,0.3)", textDecoration: "none"
+            fontSize: "11px", fontWeight: 500, color: "#3dab7a",
+            background: "rgba(61,171,122,0.09)", padding: "2px 7px", borderRadius: "5px",
+            border: "1px solid rgba(61,171,122,0.22)", textDecoration: "none", fontFamily: "monospace"
           }}>✉ {e}</a>
       ))}
       {contacts.phones?.map(p => (
         <span key={p} style={{
-          fontSize: "11px", fontWeight: 600, color: "#fbbf24", fontFamily: "monospace",
-          background: "rgba(251,191,36,0.1)", padding: "2px 8px", borderRadius: "5px",
-          border: "1px solid rgba(251,191,36,0.3)"
+          fontSize: "11px", fontWeight: 500, color: "#c49a2a", fontFamily: "monospace",
+          background: "rgba(196,154,42,0.09)", padding: "2px 7px", borderRadius: "5px",
+          border: "1px solid rgba(196,154,42,0.22)"
         }}>📞 {p}</span>
       ))}
       {contacts.has_dm && (
         <span style={{
-          fontSize: "11px", fontWeight: 600, color: "#a78bfa", fontFamily: "monospace",
-          background: "rgba(167,139,250,0.1)", padding: "2px 8px", borderRadius: "5px",
-          border: "1px solid rgba(167,139,250,0.3)"
+          fontSize: "11px", fontWeight: 500, color: "#9b7fe8", fontFamily: "monospace",
+          background: "rgba(155,127,232,0.09)", padding: "2px 7px", borderRadius: "5px",
+          border: "1px solid rgba(155,127,232,0.22)"
         }}>💬 DM on Reddit</span>
       )}
     </div>
   );
 }
 
-function PostCard({ post, isNew }) {
+function PostCard({ post, isNew, th }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div
-      onClick={() => setExpanded(!expanded)}
-      style={{
-        background: isNew
-          ? "linear-gradient(135deg, rgba(0,212,255,0.07), rgba(10,18,35,0.95))"
-          : "rgba(10,18,35,0.85)",
-        border: isNew ? "1px solid rgba(0,212,255,0.35)" : "1px solid rgba(255,255,255,0.07)",
-        borderRadius: "14px", padding: "20px 22px", marginBottom: "14px",
-        cursor: "pointer", transition: "all 0.25s ease", position: "relative",
-      }}
-    >
+    <div onClick={() => setExpanded(!expanded)} style={{
+      background: isNew ? th.newBg : th.surface,
+      border: "1px solid " + (isNew ? th.newBorder : th.border),
+      borderRadius: "10px", padding: "14px 16px", marginBottom: "8px",
+      cursor: "pointer", position: "relative",
+    }}>
       {isNew && (
         <div style={{
-          position: "absolute", top: 14, right: 14,
-          background: "rgba(0,212,255,0.2)", border: "1px solid rgba(0,212,255,0.5)",
-          borderRadius: "6px", padding: "2px 8px", fontSize: "10px",
-          fontWeight: 700, color: "#00d4ff", letterSpacing: "1px",
-          fontFamily: "monospace", animation: "pulse 2s infinite"
-        }}>NEW</div>
+          position: "absolute", top: 11, right: 11,
+          background: th.accentSoft, border: "1px solid " + th.accentBorder,
+          borderRadius: "4px", padding: "1px 6px", fontSize: "10px",
+          fontWeight: 600, color: th.accent, fontFamily: "monospace",
+        }}>new</div>
       )}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
         <div style={{
-          background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.2)",
-          borderRadius: "8px", padding: "6px 10px", minWidth: "fit-content",
-          fontSize: "11px", fontWeight: 600, color: "#00d4ff", fontFamily: "monospace"
+          background: th.accentSoft, border: "1px solid " + th.accentBorder,
+          borderRadius: "6px", padding: "3px 8px", minWidth: "fit-content",
+          fontSize: "11px", fontWeight: 500, color: th.accent, fontFamily: "monospace"
         }}>r/{post.subreddit}</div>
 
         <div style={{ flex: 1 }}>
           <h3 style={{
-            margin: "0 0 8px", fontSize: "14px", fontWeight: 600,
-            color: "#e8eaf6", lineHeight: 1.4, fontFamily: "'DM Sans', sans-serif"
+            margin: "0 0 7px", fontSize: "13px", fontWeight: 500,
+            color: th.text, lineHeight: 1.45,
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
           }}>{post.title}</h3>
 
-          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "6px" }}>
+          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "5px" }}>
             {post.tags?.map(t => (
               <span key={t} style={{
-                background: `${TAG_COLORS[t] || "#a78bfa"}18`,
-                border: `1px solid ${TAG_COLORS[t] || "#a78bfa"}44`,
-                color: TAG_COLORS[t] || "#a78bfa",
-                borderRadius: "5px", padding: "2px 8px",
-                fontSize: "11px", fontWeight: 500, fontFamily: "monospace"
+                background: (TAG_COLORS[t] || "#9b7fe8") + "14",
+                border: "1px solid " + (TAG_COLORS[t] || "#9b7fe8") + "33",
+                color: TAG_COLORS[t] || "#9b7fe8",
+                borderRadius: "4px", padding: "1px 6px",
+                fontSize: "10px", fontFamily: "monospace"
               }}>{t}</span>
             ))}
             {post.flair && (
               <span style={{
-                background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
-                color: "rgba(255,255,255,0.4)", borderRadius: "5px",
-                padding: "2px 8px", fontSize: "11px", fontFamily: "monospace"
+                border: "1px solid " + th.border, color: th.textMuted,
+                borderRadius: "4px", padding: "1px 6px", fontSize: "10px", fontFamily: "monospace"
               }}>{post.flair}</span>
             )}
           </div>
@@ -110,23 +142,23 @@ function PostCard({ post, isNew }) {
 
           {expanded && post.body && (
             <p style={{
-              margin: "12px 0 8px", fontSize: "13px", color: "rgba(255,255,255,0.6)",
-              lineHeight: 1.6, fontFamily: "'DM Sans', sans-serif",
-              background: "rgba(255,255,255,0.03)", borderRadius: "8px",
-              padding: "12px", borderLeft: "2px solid rgba(0,212,255,0.3)"
+              margin: "10px 0 6px", fontSize: "12px", color: th.textMuted,
+              lineHeight: 1.65, background: th.bg, borderRadius: "7px",
+              padding: "10px 12px", borderLeft: "2px solid " + th.border,
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
             }}>{post.body}</p>
           )}
 
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "10px" }}>
-            <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.35)", fontFamily: "monospace" }}>
-              ↑ {post.score} · {timeAgo(post.created_utc)} · by u/{post.author}
+          <div style={{ display: "flex", alignItems: "center", marginTop: "9px" }}>
+            <span style={{ fontSize: "11px", color: th.textFaint, fontFamily: "monospace" }}>
+              ↑ {post.score} · {timeAgo(post.created_utc)} · u/{post.author}
             </span>
             <a href={post.url} target="_blank" rel="noreferrer"
               onClick={e => e.stopPropagation()}
               style={{
-                fontSize: "12px", color: "#00d4ff", textDecoration: "none",
-                fontFamily: "monospace", marginLeft: "auto", opacity: 0.8
-              }}>View Post →</a>
+                fontSize: "11px", color: th.accent, textDecoration: "none",
+                fontFamily: "monospace", marginLeft: "auto"
+              }}>open →</a>
           </div>
         </div>
       </div>
@@ -143,6 +175,8 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [isMonitoring, setIsMonitoring] = useState(true);
   const [apiStatus, setApiStatus] = useState("connecting");
+  const [darkMode, setDarkMode] = useState(true);
+  const th = THEMES[darkMode ? "dark" : "light"];
   const prevIdsRef = useRef(new Set());
 
   const fetchData = useCallback(async () => {
@@ -154,8 +188,8 @@ export default function App() {
       params.set("limit", "200");
 
       const [postsRes, statsRes] = await Promise.all([
-        fetch(`${API_BASE}/api/posts?${params}`),
-        fetch(`${API_BASE}/api/stats`),
+        fetch(API_BASE + "/api/posts?" + params),
+        fetch(API_BASE + "/api/stats"),
       ]);
 
       if (!postsRes.ok || !statsRes.ok) throw new Error("API error");
@@ -190,186 +224,152 @@ export default function App() {
   }, [fetchData]);
 
   const toggleMonitor = async () => {
-    await fetch(`${API_BASE}/api/monitoring/toggle`, { method: "POST" }).catch(() => {});
+    await fetch(API_BASE + "/api/monitoring/toggle", { method: "POST" }).catch(() => {});
     fetchData();
   };
 
   const allSubs = [...new Set(posts.map(p => p.subreddit))];
   const allTags = [...new Set(posts.flatMap(p => p.tags || []))];
-  const statusColor = { connecting: "#fbbf24", live: "#34d399", error: "#f87171" }[apiStatus];
-  const statusLabel = { connecting: "CONNECTING", live: "LIVE", error: "API OFFLINE" }[apiStatus];
+
+  const statusColor = { connecting: "#c49a2a", live: "#3dab7a", error: "#c04040" }[apiStatus];
+  const statusLabel = { connecting: "connecting", live: "live", error: "offline" }[apiStatus];
+
+  const filterBtn = (active, onClick, label) => (
+    <button key={label} onClick={onClick} style={{
+      background: active ? th.accentSoft : "transparent",
+      border: "1px solid " + (active ? th.accentBorder : th.border),
+      borderRadius: "6px", padding: "4px 9px",
+      color: active ? th.accent : th.textMuted,
+      cursor: "pointer", fontSize: "11px", fontFamily: "monospace"
+    }}>{label}</button>
+  );
 
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #050d1a; }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-        @keyframes scanLine { 0%{transform:translateY(-100%)} 100%{transform:translateY(100vh)} }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
-        ::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.2); border-radius: 3px; }
-        input::placeholder { color: rgba(255,255,255,0.2); }
-        input:focus { outline: none; }
-      `}</style>
+      <style>{"* { box-sizing: border-box; margin: 0; padding: 0; } body { background: " + th.bg + "; } ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: " + th.border + "; border-radius: 3px; } input:focus { outline: none; } button { cursor: pointer; }"}</style>
 
-      <div style={{
-        minHeight: "100vh",
-        background: "radial-gradient(ellipse at 20% 20%, rgba(0,60,100,0.3), transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(0,20,60,0.4), transparent 60%), #050d1a",
-        fontFamily: "'DM Sans', sans-serif", color: "#e8eaf6",
-      }}>
-        <div style={{
-          position: "fixed", top: 0, left: 0, right: 0, height: "2px",
-          background: "linear-gradient(90deg, transparent, rgba(0,212,255,0.4), transparent)",
-          animation: "scanLine 8s linear infinite", pointerEvents: "none", zIndex: 100
-        }} />
+      <div style={{ minHeight: "100vh", background: th.bg, color: th.text, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
 
         {/* Header */}
         <div style={{
-          borderBottom: "1px solid rgba(0,212,255,0.1)",
-          background: "rgba(5,13,26,0.9)", backdropFilter: "blur(20px)",
-          padding: "18px 24px", display: "flex", alignItems: "center",
+          borderBottom: "1px solid " + th.border, background: th.bg,
+          padding: "14px 20px", display: "flex", alignItems: "center",
           justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50,
-          flexWrap: "wrap", gap: "12px"
+          flexWrap: "wrap", gap: "10px"
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            <div style={{
-              width: "36px", height: "36px",
-              background: "linear-gradient(135deg, #00d4ff22, #00d4ff44)",
-              border: "1px solid rgba(0,212,255,0.4)", borderRadius: "10px",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px"
-            }}>⬡</div>
-            <div>
-              <h1 style={{ fontSize: "16px", fontWeight: 700, fontFamily: "'Space Mono', monospace", color: "#fff" }}>
-                DevLeads Monitor
-              </h1>
-              <p style={{ fontSize: "10px", color: "rgba(0,212,255,0.6)", fontFamily: "monospace" }}>
-                Reddit 24/7 Developer Job Scanner
-              </p>
-            </div>
+          <div>
+            <div style={{ fontSize: "15px", fontWeight: 600, color: th.text }}>DevLeads</div>
+            <div style={{ fontSize: "11px", color: th.textMuted, marginTop: "1px" }}>Reddit developer job monitor</div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-              <span style={{
-                width: "8px", height: "8px", borderRadius: "50%", background: statusColor,
-                display: "inline-block", animation: apiStatus === "live" ? "pulse 2s infinite" : "none"
-              }} />
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+            {/* Status */}
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: statusColor }} />
               <span style={{ fontSize: "11px", color: statusColor, fontFamily: "monospace" }}>{statusLabel}</span>
             </div>
-            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", fontFamily: "monospace" }}>
-              Scans: <span style={{ color: "#a78bfa" }}>{stats.scan_count ?? 0}</span>
-              &nbsp;· Leads: <span style={{ color: "#34d399" }}>{stats.total_posts ?? 0}</span>
-            </div>
+
+            {/* Stats inline */}
+            <span style={{ fontSize: "11px", color: th.textMuted, fontFamily: "monospace" }}>
+              {stats.scan_count ?? 0} scans · {stats.total_posts ?? 0} leads
+            </span>
+
+            {/* Monitor toggle */}
             <button onClick={toggleMonitor} style={{
-              background: isMonitoring ? "rgba(0,212,255,0.1)" : "rgba(255,255,255,0.05)",
-              border: isMonitoring ? "1px solid rgba(0,212,255,0.4)" : "1px solid rgba(255,255,255,0.15)",
-              borderRadius: "8px", padding: "7px 14px",
-              color: isMonitoring ? "#00d4ff" : "rgba(255,255,255,0.4)",
-              cursor: "pointer", fontFamily: "'Space Mono', monospace",
-              fontSize: "11px", fontWeight: 700, letterSpacing: "1px",
-              display: "flex", alignItems: "center", gap: "7px"
+              background: "transparent",
+              border: "1px solid " + th.border,
+              borderRadius: "6px", padding: "5px 12px",
+              color: isMonitoring ? th.accent : th.textMuted,
+              fontSize: "11px", fontFamily: "monospace", fontWeight: 500
             }}>
-              <span style={{
-                width: "6px", height: "6px", borderRadius: "50%",
-                background: isMonitoring ? "#00d4ff" : "rgba(255,255,255,0.2)",
-                animation: isMonitoring ? "pulse 1.5s infinite" : "none", display: "inline-block"
-              }} />
-              {isMonitoring ? "LIVE" : "PAUSED"}
+              {isMonitoring ? "● monitoring" : "○ paused"}
             </button>
+
+            {/* Theme toggle */}
+            <button onClick={() => setDarkMode(d => !d)} style={{
+              background: "transparent", border: "1px solid " + th.border,
+              borderRadius: "6px", padding: "5px 10px",
+              color: th.textMuted, fontSize: "13px"
+            }}>{darkMode ? "☀" : "☾"}</button>
           </div>
         </div>
 
-        {/* Stats */}
-        <div style={{ display: "flex", borderBottom: "1px solid rgba(0,212,255,0.08)" }}>
+        {/* Stats bar */}
+        <div style={{ display: "flex", borderBottom: "1px solid " + th.border, background: th.statsBg }}>
           {[
-            { label: "Subreddits", value: stats.subreddits?.length ?? 0, color: "#00d4ff" },
-            { label: "Total Leads", value: stats.total_posts ?? 0, color: "#34d399" },
-            { label: "With Email", value: stats.with_email ?? 0, color: "#fbbf24" },
-            { label: "With Phone", value: stats.with_phone ?? 0, color: "#f472b6" },
+            { label: "Subreddits", value: stats.subreddits?.length ?? 0 },
+            { label: "Total Leads", value: stats.total_posts ?? 0 },
+            { label: "With Email", value: stats.with_email ?? 0 },
+            { label: "With Phone", value: stats.with_phone ?? 0 },
           ].map(s => (
-            <div key={s.label} style={{ flex: 1, padding: "12px 10px", textAlign: "center", background: "rgba(5,13,26,0.6)" }}>
-              <div style={{ fontSize: "20px", fontWeight: 700, color: s.color, fontFamily: "'Space Mono', monospace" }}>{s.value}</div>
-              <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", marginTop: "2px" }}>{s.label}</div>
+            <div key={s.label} style={{ flex: 1, padding: "12px 8px", textAlign: "center", borderRight: "1px solid " + th.border }}>
+              <div style={{ fontSize: "18px", fontWeight: 600, color: th.text, fontFamily: "monospace" }}>{s.value}</div>
+              <div style={{ fontSize: "10px", color: th.textMuted, marginTop: "2px" }}>{s.label}</div>
             </div>
           ))}
         </div>
 
         {/* Filters */}
         <div style={{
-          padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.05)",
-          display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center"
+          padding: "10px 16px", borderBottom: "1px solid " + th.border,
+          display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center",
+          background: th.bg
         }}>
           <input
-            type="text" placeholder="Search..." value={search}
+            type="text" placeholder="Search posts..." value={search}
             onChange={e => setSearch(e.target.value)}
             style={{
-              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "8px", padding: "7px 12px", color: "#e8eaf6",
-              fontSize: "13px", fontFamily: "'DM Sans', sans-serif", width: "150px"
+              background: th.inputBg, border: "1px solid " + th.border,
+              borderRadius: "6px", padding: "5px 10px", color: th.text,
+              fontSize: "12px", width: "140px"
             }}
           />
           <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
-            {["all", ...allSubs].map(s => (
-              <button key={s} onClick={() => setFilterSub(s)} style={{
-                background: filterSub === s ? "rgba(0,212,255,0.15)" : "rgba(255,255,255,0.04)",
-                border: filterSub === s ? "1px solid rgba(0,212,255,0.4)" : "1px solid rgba(255,255,255,0.08)",
-                borderRadius: "6px", padding: "4px 9px",
-                color: filterSub === s ? "#00d4ff" : "rgba(255,255,255,0.5)",
-                cursor: "pointer", fontSize: "11px", fontFamily: "monospace"
-              }}>{s === "all" ? "All" : `r/${s}`}</button>
-            ))}
+            {["all", ...allSubs].map(s => filterBtn(filterSub === s, () => setFilterSub(s), s === "all" ? "all" : "r/" + s))}
           </div>
           <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
-            {["all", ...allTags.slice(0, 5)].map(t => (
-              <button key={t} onClick={() => setFilterTag(t)} style={{
-                background: filterTag === t ? "rgba(167,139,250,0.15)" : "rgba(255,255,255,0.04)",
-                border: filterTag === t ? "1px solid rgba(167,139,250,0.4)" : "1px solid rgba(255,255,255,0.08)",
-                borderRadius: "6px", padding: "4px 9px",
-                color: filterTag === t ? "#a78bfa" : "rgba(255,255,255,0.5)",
-                cursor: "pointer", fontSize: "11px", fontFamily: "monospace"
-              }}>{t === "all" ? "All Tags" : t}</button>
-            ))}
+            {["all", ...allTags.slice(0, 5)].map(t => filterBtn(filterTag === t, () => setFilterTag(t), t === "all" ? "all tags" : t))}
           </div>
+          <span style={{ marginLeft: "auto", fontSize: "11px", color: th.textFaint, fontFamily: "monospace" }}>
+            {posts.length} results
+          </span>
         </div>
 
         {/* Error */}
         {stats.recent_errors?.length > 0 && (
           <div style={{
-            margin: "12px 16px 0", padding: "10px 14px",
-            background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.25)",
-            borderRadius: "10px", fontSize: "11px", color: "#f87171", fontFamily: "monospace"
+            margin: "12px 16px 0", padding: "9px 12px",
+            background: th.errorBg, border: "1px solid " + th.errorBorder,
+            borderRadius: "8px", fontSize: "11px", color: th.errorText, fontFamily: "monospace"
           }}>⚠ {stats.recent_errors[stats.recent_errors.length - 1]}</div>
         )}
 
         {/* Posts */}
-        <div style={{ padding: "16px", maxWidth: "900px", margin: "0 auto" }}>
+        <div style={{ padding: "14px 16px", maxWidth: "860px", margin: "0 auto" }}>
           {apiStatus === "connecting" && (
-            <div style={{ textAlign: "center", padding: "60px 0", color: "rgba(255,255,255,0.3)", fontFamily: "monospace", animation: "pulse 1.5s infinite" }}>
+            <div style={{ textAlign: "center", padding: "60px 0", color: th.textMuted, fontFamily: "monospace", fontSize: "13px" }}>
               Connecting to backend...
             </div>
           )}
           {apiStatus === "error" && (
-            <div style={{ textAlign: "center", padding: "60px 0", color: "rgba(248,113,113,0.7)" }}>
-              <div style={{ fontSize: "32px", marginBottom: "10px" }}>⚠</div>
-              <div style={{ fontFamily: "monospace" }}>Cannot reach backend</div>
-              <div style={{ fontSize: "11px", marginTop: "6px", color: "rgba(255,255,255,0.3)" }}>{API_BASE}</div>
+            <div style={{ textAlign: "center", padding: "60px 0" }}>
+              <div style={{ fontSize: "13px", color: th.errorText, fontFamily: "monospace" }}>Cannot reach backend</div>
+              <div style={{ fontSize: "11px", marginTop: "6px", color: th.textFaint }}>{API_BASE}</div>
             </div>
           )}
           {apiStatus === "live" && posts.length === 0 && (
-            <div style={{ textAlign: "center", padding: "60px 0", color: "rgba(255,255,255,0.2)" }}>
-              <div style={{ fontSize: "32px", marginBottom: "10px", animation: "pulse 2s infinite" }}>⬡</div>
-              <div style={{ fontFamily: "monospace" }}>Scanning Reddit... leads appear here automatically</div>
+            <div style={{ textAlign: "center", padding: "60px 0", color: th.textMuted, fontSize: "13px" }}>
+              Scanning Reddit for developer job posts...
             </div>
           )}
           {posts.map(post => (
-            <PostCard key={post.id} post={post} isNew={newIds.has(post.id)} />
+            <PostCard key={post.id} post={post} isNew={newIds.has(post.id)} th={th} />
           ))}
         </div>
 
-        <div style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.05)", textAlign: "center" }}>
-          <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.15)", fontFamily: "monospace" }}>
+        {/* Footer */}
+        <div style={{ padding: "14px 16px", borderTop: "1px solid " + th.border, textAlign: "center" }}>
+          <p style={{ fontSize: "10px", color: th.textFaint, fontFamily: "monospace" }}>
             DevLeads · {API_BASE} · polls every 10s
           </p>
         </div>
